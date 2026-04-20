@@ -169,6 +169,28 @@ const CaseDetail: React.FC<Props> = ({ cases, setCases }) => {
     }
   };
 
+  const handleToggleStepCompletion = async (isCompleted: boolean) => {
+    if (!currentCase || !activeStep) return;
+    try {
+      const updated = await api.updateStep(
+        currentCase.id,
+        activeStep.id,
+        activeStep.content,
+        isCompleted,
+      );
+      setCurrentCase(updated as unknown as Case);
+      setCases((prev) =>
+        prev.map((c) =>
+          c.id === currentCase.id ? (updated as unknown as Case) : c,
+        ),
+      );
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to update step completion",
+      );
+    }
+  };
+
   const handleSaveCaseDescription = async () => {
     if (!currentCase) return;
     try {
@@ -563,9 +585,10 @@ const CaseDetail: React.FC<Props> = ({ cases, setCases }) => {
                 type="checkbox"
                 className="w-6 h-6 accent-blue-600 cursor-pointer"
                 checked={activeStep.isCompleted}
-                onChange={(e) =>
-                  updateActiveStep({ isCompleted: e.target.checked })
-                }
+                onChange={(e) => {
+                  updateActiveStep({ isCompleted: e.target.checked });
+                  handleToggleStepCompletion(e.target.checked);
+                }}
               />
             </div>
           </div>

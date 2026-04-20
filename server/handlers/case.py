@@ -46,7 +46,7 @@ def update_case(session: Session, case_id: int, description: str):
     session.refresh(case)
     return case.to_dict()
 
-def update_step(session: Session, case_id: int, step_id: int, content: str):
+def update_step(session: Session, case_id: int, step_id: int, content: str, is_completed: bool = None):
     case = session.query(Case).filter(Case.id == case_id).first()
     if not case:
         return {"error": "Case not found"}, 404
@@ -54,6 +54,8 @@ def update_step(session: Session, case_id: int, step_id: int, content: str):
     if not step:
         return {"error": "Step not found"}, 404
     step.content = content
+    if is_completed is not None:
+        step.isCompleted = is_completed
     session.commit()
     session.refresh(step)
     return case.to_dict()

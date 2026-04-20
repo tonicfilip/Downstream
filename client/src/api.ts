@@ -59,11 +59,11 @@ export const api = {
     return response.json();
   },
 
-  async updateStep(caseId: number, stepId: number, content: string): Promise<Case> {
+  async updateStep(caseId: number, stepId: number, content: string, isCompleted?: boolean): Promise<Case> {
     const response = await fetch(`${API_BASE_URL}/case/${caseId}/step/${stepId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content }),
+      body: JSON.stringify({ content, isCompleted }),
     });
     if (!response.ok) throw new Error("Failed to update step");
     return response.json();

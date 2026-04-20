@@ -30,7 +30,7 @@ def update_case(id):
 @case_blueprint.route("/<int:case_id>/step/<int:step_id>", methods=["PUT"])
 def update_step(case_id, step_id):
    data = request.json
-   return case.update_step(g.db, case_id, step_id, data.get("content"))
+   return case.update_step(g.db, case_id, step_id, data.get("content"), data.get("isCompleted"))
 
 @case_blueprint.route("/<int:case_id>/step/<int:step_id>/file", methods=["POST"])
 def upload_file(case_id, step_id):
