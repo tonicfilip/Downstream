@@ -60,13 +60,6 @@ export const NewCaseModal: React.FC<Props> = ({ isOpen, onClose, onSave }) => {
             <label className="block text-sm font-semibold mb-2">
               Description (optional)
             </label>
-            <textarea
-              className="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Describe what this case is about..."
-              rows={3}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
           </div>
 
           <div className="flex gap-3 mt-8">

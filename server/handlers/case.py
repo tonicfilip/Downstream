@@ -8,6 +8,55 @@ from werkzeug.utils import secure_filename
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "..", "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+# Shared steps list - every case will have these exact steps
+SHARED_STEPS = [
+    {"title": "Ugovor o izradi studije izvodljivosti", "content": "Prepare and sign the contract for feasibility study"},
+    {"title": "Profaktura za placanje izrade studije", "content": "Create proforma invoice for feasibility study payment"},
+    {"title": "Dokaz o uplati", "content": "Upload proof of payment"},
+    {"title": "Studija", "content": "Complete the feasibility study"},
+    {"title": "Pregled u Nisu", "content": "Review in Nis"},
+    {"title": "Pregled u Beogradu", "content": "Review in Belgrade"},
+    {"title": "Potpis u Beogradu", "content": "Sign in Belgrade"},
+    {"title": "Zapisnik o primopredaji", "content": "Handover report"},
+    {"title": "UPP", "content": "UPP documentation"},
+    {"title": "Profaktura za placanje UPP", "content": "Proforma invoice for UPP payment"},
+    {"title": "Dokaz o uplati", "content": "Upload proof of payment"},
+    {"title": "UPP", "content": "UPP phase completion"},
+    {"title": "Pregled u Nisu", "content": "Review in Nis"},
+    {"title": "Pregled u Beogradu", "content": "Review in Belgrade"},
+    {"title": "Potpis u Beogradu", "content": "Sign in Belgrade"},
+    {"title": "Zavesti predmet i predati", "content": "Register and submit case"},
+    {"title": "ROP", "content": "ROP phase"},
+    {"title": "Resenje", "content": "Decision document"},
+    {"title": "Pregled u Nisu", "content": "Review in Nis"},
+    {"title": "Pregled u Beogradu", "content": "Review in Belgrade"},
+    {"title": "Potpis u Beogradu", "content": "Sign in Belgrade"},
+    {"title": "Zavesti predmet i predati", "content": "Register and submit case"},
+    {"title": "UGP", "content": "UGP phase"},
+    {"title": "Ugovor", "content": "Contract agreement"},
+    {"title": "Potpis u Beogradu", "content": "Sign in Belgrade"},
+    {"title": "Zavesti predmet i predati", "content": "Register and submit case"},
+    {"title": "PZ", "content": "PZ phase initial"},
+    {"title": "PZ", "content": "PZ phase continuation"},
+    {"title": "Pregled u Nisu", "content": "Review in Nis"},
+    {"title": "Pregled u Beogradu", "content": "Review in Belgrade"},
+    {"title": "Zavesti predmet i predati", "content": "Register and submit case"},
+    {"title": "Zahtev za ITP", "content": "Request for ITP"},
+    {"title": "Resenje komisije za ITP", "content": "ITP commission decision"},
+    {"title": "Potpis u Nisu", "content": "Sign in Nis"},
+    {"title": "Potpis u Beogradu", "content": "Sign in Belgrade"},
+    {"title": "Zavesti predmet i predati", "content": "Register and submit case"},
+    {"title": "ITP", "content": "ITP phase"},
+    {"title": "Zavesti predmet", "content": "Register case"},
+    {"title": "Resenje o probnom radu", "content": "Trial period decision"},
+    {"title": "Potpis u Nisu", "content": "Sign in Nis"},
+    {"title": "Potpis u Beogradu", "content": "Sign in Belgrade"},
+    {"title": "Nalog za vezivanje", "content": "Binding order"},
+    {"title": "Potpis u Nisu", "content": "Sign in Nis"},
+    {"title": "Potpis u Beogradu", "content": "Sign in Belgrade"},
+    {"title": "Pustanje u rad", "content": "Release to operation"},
+]
+
 def get_all(session: Session):
     cases = session.query(Case).all()
     return {"cases": [case.to_dict() for case in cases]}
@@ -18,9 +67,22 @@ def get_by_id(session: Session, id: int):
         return {"error": "Case not found"}, 404
     return case.to_dict()
 
-def create_case(session: Session, title: str, description: str = None):
-    case = Case(title=title, description=description)
+def create_case(session: Session, title: str):
+    case = Case(title=title)
     session.add(case)
+    session.commit()
+    session.refresh(case)
+    
+    # Add all shared steps to the new case
+    for order, step_data in enumerate(SHARED_STEPS):
+        step = Step(
+            case_id=case.id,
+            title=step_data["title"],
+            content=step_data["content"],
+            order=order
+        )
+        session.add(step)
+    
     session.commit()
     session.refresh(case)
     return case.to_dict()

@@ -15,7 +15,7 @@ def get_by_id(id):
 @case_blueprint.route("/", methods=["POST"])
 def create_case():
    data = request.json
-   return case.create_case(g.db, data.get("title"), data.get("description"))
+   return case.create_case(g.db, data.get("title"))
 
 @case_blueprint.route("/<int:id>/step", methods=["POST"])
 def create_step(id):
@@ -25,7 +25,7 @@ def create_step(id):
 @case_blueprint.route("/<int:id>", methods=["PUT"])
 def update_case(id):
    data = request.json
-   return case.update_case(g.db, id, data.get("description"))
+   return case.update_case(g.db, id)
 
 @case_blueprint.route("/<int:case_id>/step/<int:step_id>", methods=["PUT"])
 def update_step(case_id, step_id):
