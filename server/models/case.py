@@ -10,7 +10,6 @@ class Case(Base):
 
     id = Column(Integer, primary_key=True)
     title = Column(String(100), nullable=False)
-    description = Column(String(200), nullable=True)
     steps = relationship("Step", back_populates="owner", cascade="all, delete-orphan")
 
     def __repr__(self):
@@ -20,6 +19,5 @@ class Case(Base):
         return {
             "id": self.id,
             "title": self.title,
-            "description": self.description,
             "steps": [step.to_dict() for step in sorted(self.steps, key=lambda s: s.order)]
         }

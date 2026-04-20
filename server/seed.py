@@ -15,78 +15,76 @@ session.query(Step).delete()
 session.query(Case).delete()
 session.commit()
 
-# Dummy data
+# Shared steps list - every case will have these exact steps
+shared_steps = [
+    {"title": "Ugovor o izradi studije izvodljivosti", "content": "Prepare and sign the contract for feasibility study"},
+    {"title": "Profaktura za placanje izrade studije", "content": "Create proforma invoice for feasibility study payment"},
+    {"title": "Dokaz o uplati", "content": "Upload proof of payment"},
+    {"title": "Studija", "content": "Complete the feasibility study"},
+    {"title": "Pregled u Nisu", "content": "Review in Nis"},
+    {"title": "Pregled u Beogradu", "content": "Review in Belgrade"},
+    {"title": "Potpis u Beogradu", "content": "Sign in Belgrade"},
+    {"title": "Zapisnik o primopredaji", "content": "Handover report"},
+    {"title": "UPP", "content": "UPP documentation"},
+    {"title": "Profaktura za placanje UPP", "content": "Proforma invoice for UPP payment"},
+    {"title": "Dokaz o uplati", "content": "Upload proof of payment"},
+    {"title": "UPP", "content": "UPP phase completion"},
+    {"title": "Pregled u Nisu", "content": "Review in Nis"},
+    {"title": "Pregled u Beogradu", "content": "Review in Belgrade"},
+    {"title": "Potpis u Beogradu", "content": "Sign in Belgrade"},
+    {"title": "Zavesti predmet i predati", "content": "Register and submit case"},
+    {"title": "ROP", "content": "ROP phase"},
+    {"title": "Resenje", "content": "Decision document"},
+    {"title": "Pregled u Nisu", "content": "Review in Nis"},
+    {"title": "Pregled u Beogradu", "content": "Review in Belgrade"},
+    {"title": "Potpis u Beogradu", "content": "Sign in Belgrade"},
+    {"title": "Zavesti predmet i predati", "content": "Register and submit case"},
+    {"title": "UGP", "content": "UGP phase"},
+    {"title": "Ugovor", "content": "Contract agreement"},
+    {"title": "Potpis u Beogradu", "content": "Sign in Belgrade"},
+    {"title": "Zavesti predmet i predati", "content": "Register and submit case"},
+    {"title": "PZ", "content": "PZ phase initial"},
+    {"title": "PZ", "content": "PZ phase continuation"},
+    {"title": "Pregled u Nisu", "content": "Review in Nis"},
+    {"title": "Pregled u Beogradu", "content": "Review in Belgrade"},
+    {"title": "Zavesti predmet i predati", "content": "Register and submit case"},
+    {"title": "Zahtev za ITP", "content": "Request for ITP"},
+    {"title": "Resenje komisije za ITP", "content": "ITP commission decision"},
+    {"title": "Potpis u Nisu", "content": "Sign in Nis"},
+    {"title": "Potpis u Beogradu", "content": "Sign in Belgrade"},
+    {"title": "Zavesti predmet i predati", "content": "Register and submit case"},
+    {"title": "ITP", "content": "ITP phase"},
+    {"title": "Zavesti predmet", "content": "Register case"},
+    {"title": "Resenje o probnom radu", "content": "Trial period decision"},
+    {"title": "Potpis u Nisu", "content": "Sign in Nis"},
+    {"title": "Potpis u Beogradu", "content": "Sign in Belgrade"},
+    {"title": "Nalog za vezivanje", "content": "Binding order"},
+    {"title": "Potpis u Nisu", "content": "Sign in Nis"},
+    {"title": "Potpis u Beogradu", "content": "Sign in Belgrade"},
+    {"title": "Pustanje u rad", "content": "Release to operation"},
+]
+
+# Dummy data - cases with dynamic titles but same steps
 dummy_cases = [
     {
         "title": "Q4 Audit Review",
-        "description": "Complete financial audit for Q4 2024",
-        "steps": [
-            "Review financial statements",
-            "Verify transactions",
-            "Check compliance",
-            "Generate audit report"
-        ]
-    },
-    {
-        "title": "Product Launch - Mobile App",
-        "description": "Launch new mobile app to app stores",
-        "steps": [
-            "Final testing and QA",
-            "App store submission",
-            "Wait for approval",
-            "Release to users",
-            "Monitor crash reports"
-        ]
-    },
-    {
-        "title": "Client Onboarding - Acme Corp",
-        "description": "Onboard new enterprise customer",
-        "steps": [
-            "Setup account and billing",
-            "Configure integrations",
-            "Train client team",
-            "Go live",
-            "Post-launch support"
-        ]
-    },
-    {
-        "title": "Infrastructure Migration",
-        "description": "Migrate from AWS to GCP",
-        "steps": [
-            "Assess current infrastructure",
-            "Plan migration strategy",
-            "Setup GCP resources",
-            "Migrate data",
-            "Test and validate",
-            "Cutover to production"
-        ]
-    },
-    {
-        "title": "Security Audit",
-        "description": "Third-party security assessment",
-        "steps": [
-            "Vulnerability scanning",
-            "Penetration testing",
-            "Code review",
-            "Risk assessment",
-            "Remediation planning"
-        ]
     }
 ]
 
 # Create cases and steps
 for case_data in dummy_cases:
     case = Case(
-        title=case_data["title"],
-        description=case_data["description"]
+        title=case_data["title"]
     )
     session.add(case)
     session.flush()  # Get the case ID
 
-    for step_title in case_data["steps"]:
+    for order, step_data in enumerate(shared_steps):
         step = Step(
             case_id=case.id,
-            title=step_title
+            title=step_data["title"],
+            content=step_data["content"],
+            order=order
         )
         session.add(step)
 

@@ -27,7 +27,11 @@ const CaseDetail: React.FC<Props> = ({ cases, setCases }) => {
 
   const handleDeleteCase = async () => {
     if (!currentCase) return;
-    if (!window.confirm("Are you sure you want to delete this case? This action cannot be undone.")) {
+    if (
+      !window.confirm(
+        "Are you sure you want to delete this case? This action cannot be undone.",
+      )
+    ) {
       return;
     }
     try {
@@ -64,7 +68,11 @@ const CaseDetail: React.FC<Props> = ({ cases, setCases }) => {
       return;
     }
     try {
-      const updated = await api.deleteFile(currentCase.id, activeStep.id, fileName);
+      const updated = await api.deleteFile(
+        currentCase.id,
+        activeStep.id,
+        fileName,
+      );
       setCurrentCase(updated as unknown as Case);
       setCases((prev) =>
         prev.map((c) =>
@@ -357,9 +365,7 @@ const CaseDetail: React.FC<Props> = ({ cases, setCases }) => {
                       autoFocus
                     />
                     <button
-                      onClick={() =>
-                        handleRenameStep(step.id, editedStepTitle)
-                      }
+                      onClick={() => handleRenameStep(step.id, editedStepTitle)}
                       className="px-2 py-1 bg-blue-600 text-white rounded text-xs font-bold hover:bg-blue-700"
                     >
                       ✓
@@ -399,16 +405,19 @@ const CaseDetail: React.FC<Props> = ({ cases, setCases }) => {
                     </span>
                     {isLocked && <span className="ml-auto text-xs">🔒</span>}
                     {isActive && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteStep(step.id);
-                        }}
-                        className="ml-auto text-red-400 hover:text-red-300 font-bold text-lg"
-                        title="Delete step"
-                      >
-                        ×
-                      </button>
+                      <>
+                        <a
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteStep(step.id);
+                          }}
+                          className="ml-auto text-red-400 hover:text-red-300 font-bold text-lg"
+                          title="Delete step"
+                        >
+                          ×
+                        </a>
+                      </>
                     )}
                   </button>
                 )}
@@ -499,48 +508,6 @@ const CaseDetail: React.FC<Props> = ({ cases, setCases }) => {
             <h1 className="text-4xl font-black text-slate-900 mt-2">
               {activeStep ? activeStep.title : " "}
             </h1>
-          </div>
-
-          <div className="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm mb-8">
-            <label className="block text-sm font-bold text-slate-700 mb-2">
-              Case Description
-            </label>
-            {editingCaseDesc ? (
-              <div>
-                <textarea
-                  className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl h-24 outline-none focus:ring-2 focus:ring-blue-500 transition-all mb-4"
-                  placeholder="Describe the case..."
-                  value={caseDescription}
-                  onChange={(e) => setCaseDescription(e.target.value)}
-                />
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleSaveCaseDescription}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700"
-                  >
-                    Save
-                  </button>
-                  <button
-                    onClick={() => {
-                      setEditingCaseDesc(false);
-                      setCaseDescription(currentCase.description || "");
-                    }}
-                    className="px-4 py-2 bg-slate-200 text-slate-900 rounded-lg font-semibold hover:bg-slate-300"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div
-                onClick={() => setEditingCaseDesc(true)}
-                className="p-4 bg-slate-50 border border-slate-200 rounded-2xl cursor-pointer hover:bg-slate-100 transition"
-              >
-                <p className="text-slate-700">
-                  {caseDescription || "Click to add case description..."}
-                </p>
-              </div>
-            )}
           </div>
 
           <div className="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm">
