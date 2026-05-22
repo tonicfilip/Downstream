@@ -39,7 +39,7 @@ def upload_file(case_id, step_id):
    file = request.files["file"]
    if file.filename == "":
       return {"error": "No file selected"}, 400
-   return case.upload_file(g.db, case_id, step_id, file)
+   return case.upload_file_handler(g.db, case_id, step_id, file)
 
 @case_blueprint.route("/<int:case_id>/step/<int:step_id>/file/<filename>", methods=["GET"])
 def download_file(case_id, step_id, filename):

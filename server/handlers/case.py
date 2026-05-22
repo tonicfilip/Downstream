@@ -5,8 +5,13 @@ import os
 import uuid
 from werkzeug.utils import secure_filename
 
+from storage.r2 import download_file, upload_file
+
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "..", "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+ALLOWED_EXTENSIONS = {"pdf", "png", "jpg", "jpeg", "docx", "txt"}
+MAX_SIZE_BYTES = 10 * 1024 * 1024  # 10MB
 
 # Shared steps list - every case will have these exact steps
 SHARED_STEPS = [
@@ -122,48 +127,82 @@ def update_step(session: Session, case_id: int, step_id: int, content: str, is_c
     session.refresh(step)
     return case.to_dict()
 
-def upload_file(session: Session, case_id: int, step_id: int, file):
-    case = session.query(Case).filter(Case.id == case_id).first()
-    if not case:
-        return {"error": "Case not found"}, 404
+# def upload_file(session: Session, case_id: int, step_id: int, file):
+#     case = session.query(Case).filter(Case.id == case_id).first()
+#     if not case:
+#         return {"error": "Case not found"}, 404
 
-    step = session.query(Step).filter(Step.id == step_id, Step.case_id == case_id).first()
-    if not step:
-        return {"error": "Step not found"}, 404
+#     step = session.query(Step).filter(Step.id == step_id, Step.case_id == case_id).first()
+#     if not step:
+#         return {"error": "Step not found"}, 404
 
-    # Save file with unique name
+#     # Save file with unique name
+#     filename = secure_filename(file.filename)
+#     unique_filename = f"{uuid.uuid4()}_{filename}"
+#     filepath = os.path.join(UPLOAD_FOLDER, unique_filename)
+#     file.save(filepath)
+
+#     # Update step with file reference
+#     step.fileId = unique_filename
+#     session.commit()
+#     session.refresh(step)
+
+#     return case.to_dict()
+
+# def download_file(session: Session, case_id: int, step_id: int, filename: str):
+#     from flask import send_from_directory
+
+#     case = session.query(Case).filter(Case.id == case_id).first()
+#     if not case:
+#         return {"error": "Case not found"}, 404
+
+#     step = session.query(Step).filter(Step.id == step_id, Step.case_id == case_id).first()
+#     if not step:
+#         return {"error": "Step not found"}, 404
+
+#     # Verify the file belongs to this step
+#     if step.fileId != filename:
+#         return {"error": "File not found"}, 404
+
+#     filepath = os.path.join(UPLOAD_FOLDER, filename)
+#     if not os.path.exists(filepath):
+#         return {"error": "File not found"}, 404
+
+#     return send_from_directory(UPLOAD_FOLDER, filename)
+
+def upload_file_handler(db, case_id, step_id, file):
+    # Validate extension
     filename = secure_filename(file.filename)
-    unique_filename = f"{uuid.uuid4()}_{filename}"
-    filepath = os.path.join(UPLOAD_FOLDER, unique_filename)
-    file.save(filepath)
+    ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+    if ext not in ALLOWED_EXTENSIONS:
+        return {"error": f"File type .{ext} not allowed"}, 400
 
-    # Update step with file reference
-    step.fileId = unique_filename
-    session.commit()
-    session.refresh(step)
+    # Validate size
+    file.seek(0, 2)  # seek to end
+    size = file.tell()
+    file.seek(0)     # reset
+    if size > MAX_SIZE_BYTES:
+        return {"error": "File exceeds 10MB limit"}, 400
 
-    return case.to_dict()
+    # Store with a namespaced key: case/{case_id}/step/{step_id}/{filename}
+    key = f"case/{case_id}/step/{step_id}/{filename}"
+    upload_file(file, key)
 
-def download_file(session: Session, case_id: int, step_id: int, filename: str):
-    from flask import send_from_directory
+    # Save the key to DB (store key, not local path)
+    # update your Step model to save `file_key = key`
 
-    case = session.query(Case).filter(Case.id == case_id).first()
-    if not case:
-        return {"error": "Case not found"}, 404
+    return {"filename": filename, "key": key}, 201
 
-    step = session.query(Step).filter(Step.id == step_id, Step.case_id == case_id).first()
-    if not step:
-        return {"error": "Step not found"}, 404
+def download_file_handler(db, case_id, step_id, filename):
+    key = f"case/{case_id}/step/{step_id}/{filename}"
+    url = download_file(key)
+    # Return a redirect or the presigned URL directly
+    return {"url": url}, 200
 
-    # Verify the file belongs to this step
-    if step.fileId != filename:
-        return {"error": "File not found"}, 404
-
-    filepath = os.path.join(UPLOAD_FOLDER, filename)
-    if not os.path.exists(filepath):
-        return {"error": "File not found"}, 404
-
-    return send_from_directory(UPLOAD_FOLDER, filename)
+def delete_file_handler(db, case_id, step_id, filename):
+    key = f"case/{case_id}/step/{step_id}/{filename}"
+    delete_file(key)
+    return {"deleted": filename}, 200
 
 def delete_case(session: Session, case_id: int):
     case = session.query(Case).filter(Case.id == case_id).first()
