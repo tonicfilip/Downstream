@@ -4,8 +4,8 @@ from models.step import Step
 import os
 import uuid
 from werkzeug.utils import secure_filename
-
-from storage.r2 import download_file, upload_file
+from flask import g
+from storage.r2 import download_file as r2_download_file, upload_file as r2_upload_file
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "..", "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -186,8 +186,12 @@ def upload_file_handler(db, case_id, step_id, file):
 
     # Store with a namespaced key: case/{case_id}/step/{step_id}/{filename}
     key = f"case/{case_id}/step/{step_id}/{filename}"
-    upload_file(file, key)
-
+    r2_upload_file(file, key)
+    
+    step = db.query(Step).filter(Step.id == step_id, Step.case_id == case_id).first()
+    step.fileId = key
+    db.commit()
+    db.refresh(step)
     # Save the key to DB (store key, not local path)
     # update your Step model to save `file_key = key`
 
@@ -195,7 +199,7 @@ def upload_file_handler(db, case_id, step_id, file):
 
 def download_file_handler(db, case_id, step_id, filename):
     key = f"case/{case_id}/step/{step_id}/{filename}"
-    url = download_file(key)
+    url = r2_download_file(key)
     # Return a redirect or the presigned URL directly
     return {"url": url}, 200
 
