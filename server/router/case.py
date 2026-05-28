@@ -43,7 +43,7 @@ def upload_file(case_id, step_id):
 
 @case_blueprint.route("/<int:case_id>/step/<int:step_id>/file/<filename>", methods=["GET"])
 def download_file(case_id, step_id, filename):
-   return case.download_file(g.db, case_id, step_id, filename)
+   return case.download_file_handler(g.db, case_id, step_id, filename)
 
 @case_blueprint.route("/<int:case_id>", methods=["DELETE"])
 def delete_case(case_id):
@@ -53,7 +53,7 @@ def delete_case(case_id):
 def delete_step(case_id, step_id):
    return case.delete_step(g.db, case_id, step_id)
 
-@case_blueprint.route("/<int:case_id>/step/<int:step_id>/<filename>", methods=["DELETE"])
+@case_blueprint.route("/<int:case_id>/step/<int:step_id>/file/<filename>", methods=["DELETE"])
 def delete_file(case_id, step_id, filename):
    return case.delete_file(g.db, case_id, step_id, filename)
 

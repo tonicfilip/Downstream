@@ -2,7 +2,7 @@ export interface Step {
     id: number;
     case_id: number;
     title: string;
-    fileId: string | null;
+    fileIds: string[] | null;
     content: string;
     isCompleted: boolean;
     order: number;

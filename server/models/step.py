@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, create_engine
+from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, create_engine, ARRAY, UUID
 from sqlalchemy.orm import DeclarativeBase, relationship
 from models.base import Base
 
@@ -11,7 +11,7 @@ class Step(Base):
     case_id = Column(Integer, ForeignKey("cases.id")) # The link
     title = Column(String(100), nullable=False)
     content = Column(String(1000), nullable=True, default="")
-    fileId = Column(String(255), nullable=True)
+    fileIds = Column(ARRAY(String), nullable=True)
     isCompleted = Column(Boolean, nullable=False, default=False)
     order = Column(Integer, nullable=False, default=0)
     owner = relationship("Case", back_populates="steps")
@@ -22,7 +22,7 @@ class Step(Base):
             "case_id": self.case_id,
             "title": self.title,
             "content": self.content,
-            "fileId": self.fileId,
+            "fileIds": self.fileIds,
             "isCompleted": self.isCompleted,
             "order": self.order,
         }
