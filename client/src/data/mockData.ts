@@ -2,76 +2,92 @@ import type { Case } from '../types';
 
 export const MOCK_CASES: Case[] = [
     {
-        "id": "case-001",
+        "id": 1,
         "title": "Elektrana Nis 1",
         "steps": [
             {
-                "id": "step-101",
+                "id": 101,
+                "case_id": 1,
                 "title": "Identity Verification",
-                "fileId": "id-scan-882.pdf",
+                "fileIds": ["id-scan-882.pdf"],
                 "content": "Verified passport and social security card.",
-                "isCompleted": true
+                "isCompleted": true,
+                "order": 0
             },
             {
-                "id": "step-102",
+                "id": 102,
+                "case_id": 1,
                 "title": "Background Check",
-                "fileId": null,
+                "fileIds": null,
                 "content": "Waiting for third-party clearing house response.",
-                "isCompleted": false
+                "isCompleted": false,
+                "order": 1
             },
             {
-                "id": "step-103",
+                "id": 103,
+                "case_id": 1,
                 "title": "Contract Signing",
-                "fileId": null,
+                "fileIds": null,
                 "content": "",
-                "isCompleted": false
+                "isCompleted": false,
+                "order": 2
             }
         ]
     },
     {
-        "id": "case-002",
+        "id": 2,
         "title": "Elektrana Puturovce - manja",
         "steps": [
             {
-                "id": "step-201",
+                "id": 201,
+                "case_id": 2,
                 "title": "Initial Briefing",
-                "fileId": "brief-v1.docx",
+                "fileIds": ["brief-v1.docx"],
                 "content": "Project scope involves internal restructuring.",
-                "isCompleted": true
+                "isCompleted": true,
+                "order": 0
             },
             {
-                "id": "step-202",
+                "id": 202,
+                "case_id": 2,
                 "title": "Conflict of Interest Check",
-                "fileId": "coi-form.pdf",
+                "fileIds": ["coi-form.pdf"],
                 "content": "No conflicts found within the executive board.",
-                "isCompleted": true
+                "isCompleted": true,
+                "order": 1
             },
             {
-                "id": "step-203",
+                "id": 203,
+                "case_id": 2,
                 "title": "Final Compliance Approval",
-                "fileId": null,
+                "fileIds": null,
                 "content": "Pending final signature from the Legal Director.",
-                "isCompleted": false
+                "isCompleted": false,
+                "order": 2
             }
         ]
     },
     {
-        "id": "case-003",
+        "id": 3,
         "title": "Elektrana - sta li napisa Srbine",
         "steps": [
             {
-                "id": "step-301",
+                "id": 301,
+                "case_id": 3,
                 "title": "Equipment Listing",
-                "fileId": null,
+                "fileIds": null,
                 "content": "",
-                "isCompleted": false
+                "isCompleted": false,
+                "order": 0
             },
             {
-                "id": "step-302",
+                "id": 302,
+                "case_id": 3,
                 "title": "Vendor Selection",
-                "fileId": null,
+                "fileIds": null,
                 "content": "",
-                "isCompleted": false
+                "isCompleted": false,
+                "order": 1
             }
         ]
     }

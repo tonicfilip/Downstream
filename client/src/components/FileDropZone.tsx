@@ -3,15 +3,15 @@ import { useDropzone } from "react-dropzone";
 import { api } from "../api";
 
 interface FileDropZoneProps {
-  currentFileId: string | null;
-  onFileAccepted: (fileName: string) => void;
+  currentFileIds: string[];
+  onFileAccepted: (fileIds: string[]) => void;
   caseId: number;
   stepId: number;
   isLocked?: boolean;
 }
 
 export const FileDropZone: React.FC<FileDropZoneProps> = ({
-  currentFileId,
+  currentFileIds,
   onFileAccepted,
   caseId,
   stepId,
@@ -23,16 +23,21 @@ export const FileDropZone: React.FC<FileDropZoneProps> = ({
     async (acceptedFiles: File[]) => {
       if (isLocked || uploading) return;
 
-      const file = acceptedFiles[0];
-      if (file && file.type === "application/pdf") {
-        setUploading(true);
-        try {
-          await api.uploadFile(caseId, stepId, file);
-          onFileAccepted(file.name);
-        } catch (err) {
-          console.error("Failed to upload file:", err);
-        } finally {
-          setUploading(false);
+      for (const file of acceptedFiles) {
+        if (file.type === "application/pdf") {
+          setUploading(true);
+          try {
+            const response = await api.uploadFile(caseId, stepId, file);
+            const caseData = response as unknown as { steps: Array<{ id: number; fileIds: string[] | null }> };
+            const updatedStep = caseData.steps.find((s) => s.id === stepId);
+            if (updatedStep && updatedStep.fileIds) {
+              onFileAccepted(updatedStep.fileIds);
+            }
+          } catch (err) {
+            console.error("Failed to upload file:", err);
+          } finally {
+            setUploading(false);
+          }
         }
       }
     },
@@ -42,7 +47,7 @@ export const FileDropZone: React.FC<FileDropZoneProps> = ({
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: { "application/pdf": [".pdf"] },
-    multiple: false,
+    multiple: true,
     disabled: isLocked || uploading,
   });
 
@@ -59,22 +64,22 @@ export const FileDropZone: React.FC<FileDropZoneProps> = ({
     >
       <input {...getInputProps()} />
       <div className="text-4xl mb-3">
-        {uploading ? "⏳" : currentFileId ? "📄" : isDragActive ? "📥" : "☁️"}
+        {uploading ? "⏳" : currentFileIds.length > 0 ? "📄" : isDragActive ? "📥" : "☁️"}
       </div>
 
       <p className="text-sm font-bold text-slate-700 text-center">
         {uploading
           ? "Uploading..."
-          : currentFileId
-            ? `File: ${currentFileId}`
+          : currentFileIds.length > 0
+            ? `${currentFileIds.length} file${currentFileIds.length !== 1 ? "s" : ""} uploaded`
             : "Drag & Drop PDF"}
       </p>
 
       <p className="text-xs text-slate-400 mt-1">
         {uploading
           ? "Please wait..."
-          : currentFileId
-            ? "Click to replace file"
+          : currentFileIds.length > 0
+            ? "Click to add more files"
             : "or click to browse local files"}
       </p>
 

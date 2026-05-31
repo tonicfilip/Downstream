@@ -204,7 +204,8 @@ def upload_file_handler(db, case_id, step_id, file):
     db.commit()
     db.refresh(step)
 
-    return {"filename": filename, "file_id": str(file_id), "key": key}, 201
+    case = db.query(Case).filter(Case.id == case_id).first()
+    return case.to_dict(), 201
 
 def download_file_handler(db, case_id, step_id, filename):
     step = db.query(Step).filter(Step.id == step_id, Step.case_id == case_id).first()
