@@ -1,8 +1,9 @@
 from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, create_engine, ARRAY, UUID
 from sqlalchemy.orm import DeclarativeBase, relationship
 from models.base import Base
+from config import get_database_url
 
-engine = create_engine("postgresql://filip:1234@localhost:5432/downstream", echo=True)
+engine = create_engine(get_database_url(), echo=True)
 
 class Step(Base):
     __tablename__ = "steps"

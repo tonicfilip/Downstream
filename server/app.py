@@ -3,9 +3,13 @@ from flask_cors import CORS
 from sqlalchemy.orm import sessionmaker
 from models.case import engine
 from router.router import router_blueprint
+import os
 
 app = Flask(__name__)
-CORS(app)
+
+# Configure CORS
+cors_origins = os.getenv('CORS_ORIGINS', 'http://localhost:5173').split(',')
+CORS(app, resources={r"/case/*": {"origins": cors_origins}})
 
 # Database session setup
 SessionLocal = sessionmaker(bind=engine)
@@ -25,4 +29,5 @@ def teardown_db_session(exception):
 app.register_blueprint(router_blueprint, url_prefix="/")
 
 if __name__ == "__main__":
-    app.run(debug=False)
+    debug = os.getenv('ENVIRONMENT', 'local') == 'local'
+    app.run(debug=debug)
