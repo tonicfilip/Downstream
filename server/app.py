@@ -29,5 +29,11 @@ def teardown_db_session(exception):
 app.register_blueprint(router_blueprint, url_prefix="/")
 
 if __name__ == "__main__":
-    debug = os.getenv('ENVIRONMENT', 'local') == 'local'
-    app.run(debug=debug)
+    # 1. Determine if we are in local development
+    is_local = os.getenv('ENVIRONMENT', 'local') == 'local'
+    
+    # 2. Grab Railway's dynamic PORT variable, fallback to 5000 locally
+    port = int(os.getenv('PORT', 5000))
+    
+    # 3. Bind to 0.0.0.0 so the public internet can route to the container
+    app.run(host='0.0.0.0', port=port, debug=is_local)
