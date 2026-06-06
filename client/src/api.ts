@@ -16,6 +16,37 @@ export interface Step {
   isCompleted: boolean;
 }
 
+/**
+ * Error thrown by the API client. Carries the HTTP `status` (when the failure
+ * came from a response) and, when available, the human-readable message the
+ * server returned in its `{ "error": ... }` body.
+ */
+export class ApiError extends Error {
+  readonly status?: number;
+
+  constructor(message: string, options?: { status?: number; cause?: unknown }) {
+    super(message, options?.cause !== undefined ? { cause: options.cause } : undefined);
+    this.name = "ApiError";
+    this.status = options?.status;
+  }
+
+  /** Build an ApiError from a non-OK response, preferring the server's message. */
+  static async fromResponse(response: Response, fallback: string): Promise<ApiError> {
+    let message = fallback;
+    try {
+      const data: unknown = await response.json();
+      if (data && typeof data === "object") {
+        const record = data as Record<string, unknown>;
+        if (typeof record.error === "string") message = record.error;
+        else if (typeof record.message === "string") message = record.message;
+      }
+    } catch {
+      // Body wasn't JSON (e.g. an HTML error page or empty 500); keep the fallback.
+    }
+    return new ApiError(message, { status: response.status });
+  }
+}
+
 export const api = {
   async getAllCases(): Promise<{ cases: Case[] }> {
     const response = await fetch(`${API_BASE_URL}/case/`);
@@ -72,11 +103,19 @@ export const api = {
   async uploadFile(caseId: number, stepId: number, file: File): Promise<Case> {
     const formData = new FormData();
     formData.append("file", file);
-    const response = await fetch(`${API_BASE_URL}/case/${caseId}/step/${stepId}/file`, {
-      method: "POST",
-      body: formData,
-    });
-    if (!response.ok) throw new Error("Failed to upload file");
+
+    let response: Response;
+    try {
+      response = await fetch(`${API_BASE_URL}/case/${caseId}/step/${stepId}/file`, {
+        method: "POST",
+        body: formData,
+      });
+    } catch (cause) {
+      // fetch only rejects on network-level failures (offline, DNS, CORS).
+      throw new ApiError("Network error — could not reach the server.", { cause });
+    }
+
+    if (!response.ok) throw await ApiError.fromResponse(response, "Failed to upload file");
     return response.json();
   },
 

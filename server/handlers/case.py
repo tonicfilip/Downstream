@@ -10,8 +10,8 @@ from storage.r2 import download_file as r2_download_file, upload_file as r2_uplo
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "..", "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-ALLOWED_EXTENSIONS = {"pdf", "png", "jpg", "jpeg", "docx", "txt"}
-MAX_SIZE_BYTES = 10 * 1024 * 1024  # 10MB
+ALLOWED_EXTENSIONS = {"pdf", "png", "jpg", "jpeg", "docx", "xlsx", "xls", "txt"}
+MAX_SIZE_BYTES = 50 * 1024 * 1024  # 50MB
 
 # Shared steps list - every case will have these exact steps
 SHARED_STEPS = [
@@ -182,7 +182,7 @@ def upload_file_handler(db, case_id, step_id, file):
     size = file.tell()
     file.seek(0)     # reset
     if size > MAX_SIZE_BYTES:
-        return {"error": "File exceeds 10MB limit"}, 400
+        return {"error": "File exceeds 50MB limit"}, 400
 
     # Generate UUID for the file
     file_id = uuid.uuid4()
