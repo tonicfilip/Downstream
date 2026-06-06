@@ -2,8 +2,9 @@ from sqlalchemy import Column, Integer, String, create_engine
 from sqlalchemy.orm import DeclarativeBase, relationship
 from models.step import Step
 from models.base import Base
+from config import get_database_url
 
-engine = create_engine("postgresql://filip:1234@localhost:5432/downstream", echo=True)
+engine = create_engine(get_database_url(), echo=True)
 
 class Case(Base):
     __tablename__ = "cases"

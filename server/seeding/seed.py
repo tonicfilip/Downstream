@@ -1,10 +1,9 @@
 from sqlalchemy.orm import sessionmaker
 from models.case import engine, Case
 from models.step import Step
-from models.base import Base
 
-# Create all tables
-Base.metadata.create_all(engine)
+# NOTE: the schema is owned by Alembic. Run `alembic upgrade head` before seeding.
+# Do NOT create_all() here — it bypasses migrations and causes schema drift.
 
 # Create session
 SessionLocal = sessionmaker(bind=engine)
